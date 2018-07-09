@@ -65,6 +65,7 @@ static bool sched_boost_active;
 static int dynamic_stune_boost;
 module_param(dynamic_stune_boost, uint, 0644);
 static bool stune_boost_active;
+static int boost_slot;
 #endif /* CONFIG_DYNAMIC_STUNE_BOOST */
 
 static struct delayed_work input_boost_rem;
@@ -248,7 +249,7 @@ static void do_input_boost_rem(struct work_struct *work)
 #ifdef CONFIG_DYNAMIC_STUNE_BOOST
 	/* Reset dynamic stune boost value to the default value */
 	if (stune_boost_active) {
-		reset_stune_boost("top-app");
+		reset_stune_boost("top-app", boost_slot);
 		stune_boost_active = false;
 	}
 #endif /* CONFIG_DYNAMIC_STUNE_BOOST */
@@ -277,7 +278,7 @@ static void do_input_boost(struct kthread_work *work)
 
 #ifdef CONFIG_DYNAMIC_STUNE_BOOST
 	if (stune_boost_active) {
-		reset_stune_boost("top-app");
+		reset_stune_boost("top-app", boost_slot);
 		stune_boost_active = false;
 	}
 #endif /* CONFIG_DYNAMIC_STUNE_BOOST */
@@ -303,7 +304,7 @@ static void do_input_boost(struct kthread_work *work)
 
 #ifdef CONFIG_DYNAMIC_STUNE_BOOST
 	/* Set dynamic stune boost value */
-	ret = do_stune_boost("top-app", dynamic_stune_boost);
+	ret = do_stune_boost("top-app", dynamic_stune_boost, &boost_slot);
 	if (!ret)
 		stune_boost_active = true;
 #endif /* CONFIG_DYNAMIC_STUNE_BOOST */
@@ -343,7 +344,7 @@ static void do_powerkey_input_boost(struct kthread_work *work)
 
 #ifdef CONFIG_DYNAMIC_STUNE_BOOST
 	/* Set dynamic stune boost value */
-	ret = do_stune_boost("top-app", dynamic_stune_boost);
+	ret = do_stune_boost("top-app", dynamic_stune_boost, &boost_slot);
 	if (!ret)
 		stune_boost_active = true;
 #endif /* CONFIG_DYNAMIC_STUNE_BOOST */
@@ -410,7 +411,7 @@ static void cpuboost_input_disconnect(struct input_handle *handle)
 {
 #ifdef CONFIG_DYNAMIC_STUNE_BOOST
 	/* Reset dynamic stune boost value to the default value */
-	reset_stune_boost("top-app");
+	reset_stune_boost("top-app", boost_slot);
 #endif /* CONFIG_DYNAMIC_STUNE_BOOST */
 
 	input_close_device(handle);
