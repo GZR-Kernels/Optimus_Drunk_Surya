@@ -442,7 +442,7 @@ void wake_q_add(struct wake_q_head *head, struct task_struct *task)
 	 * This cmpxchg() implies a full barrier, which pairs with the write
 	 * barrier implied by the wakeup in wake_up_q().
 	 */
-	if (cmpxchg(&node->next, NULL, WAKE_Q_TAIL))
+	if (unlikely(cmpxchg(&node->next, NULL, WAKE_Q_TAIL)))
 		return;
 
 	head->count++;
