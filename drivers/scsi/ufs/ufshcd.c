@@ -2878,6 +2878,9 @@ static ssize_t ufshcd_hibern8_on_idle_enable_store(struct device *dev,
 	unsigned long flags;
 	u32 value;
 
+	if (!ufshcd_is_hibern8_on_idle_allowed(hba))
+		return count;
+
 	if (kstrtou32(buf, 0, &value))
 		return -EINVAL;
 
@@ -2915,8 +2918,7 @@ static void ufshcd_init_hibern8_on_idle(struct ufs_hba *hba)
 	/* initialize the state variable here */
 	hba->hibern8_on_idle.state = HIBERN8_EXITED;
 
-	if (!ufshcd_is_hibern8_on_idle_allowed(hba) &&
-	    !ufshcd_is_auto_hibern8_supported(hba))
+	if (!ufshcd_is_hibern8_on_idle_allowed(hba))
 		return;
 
 	if (ufshcd_is_auto_hibern8_supported(hba)) {
@@ -2960,8 +2962,7 @@ static void ufshcd_init_hibern8_on_idle(struct ufs_hba *hba)
 
 static void ufshcd_exit_hibern8_on_idle(struct ufs_hba *hba)
 {
-	if (!ufshcd_is_hibern8_on_idle_allowed(hba) &&
-	    !ufshcd_is_auto_hibern8_supported(hba))
+	if (!ufshcd_is_hibern8_on_idle_allowed(hba))
 		return;
 	device_remove_file(hba->dev, &hba->hibern8_on_idle.delay_attr);
 	device_remove_file(hba->dev, &hba->hibern8_on_idle.enable_attr);
