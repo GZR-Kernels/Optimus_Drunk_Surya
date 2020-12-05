@@ -450,9 +450,10 @@ bool __skb_flow_dissect(const struct sk_buff *skb,
 		nhoff = skb_network_offset(skb);
 		hlen = skb_headlen(skb);
 #if IS_ENABLED(CONFIG_NET_DSA)
-		if (unlikely(skb->dev && netdev_uses_dsa(skb->dev))) {
+		if (unlikely(skb->dev && netdev_uses_dsa(skb->dev) &&
+			     proto == htons(ETH_P_XDSA))) {
 			const struct dsa_device_ops *ops;
-			int offset;
+			int offset = 0;
 
 			ops = skb->dev->dsa_ptr->tag_ops;
 			if (ops->flow_dissect &&
@@ -889,7 +890,7 @@ out_bad:
 }
 EXPORT_SYMBOL(__skb_flow_dissect);
 
-static siphash_key_t hashrnd  __read_mostly;
+static siphash_key_t hashrnd __read_mostly;
 static __always_inline void __flow_hash_secret_init(void)
 {
 	net_get_random_once(&hashrnd, sizeof(hashrnd));
@@ -983,7 +984,7 @@ static inline void __flow_hash_consistentify(struct flow_keys *keys)
 }
 
 static inline u32 __flow_hash_from_keys(struct flow_keys *keys,
-                                       const siphash_key_t *keyval)
+					const siphash_key_t *keyval)
 {
 	u32 hash;
 
@@ -1081,7 +1082,7 @@ void __skb_get_hash(struct sk_buff *skb)
 EXPORT_SYMBOL(__skb_get_hash);
 
 __u32 skb_get_hash_perturb(const struct sk_buff *skb,
-                          const siphash_key_t *perturb)
+			   const siphash_key_t *perturb)
 {
 	struct flow_keys keys;
 
