@@ -24,8 +24,6 @@
 #include "dsi_display.h"
 #include "dsi_ctrl_hw.h"
 #include "dsi_parser.h"
-#include "dsi_panel_mi.h"
-#include "xiaomi_frame_stat.h"
 
 /**
  * topology is currently defined by a set of following 3 values:
@@ -47,8 +45,6 @@
 
 extern void lcd_esd_enable(bool on);
 extern char g_lcd_id_mi[64];
-extern struct frame_stat fm_stat;
-struct dsi_panel *g_panel;
 
 static int panel_disp_param_send_lock(struct dsi_panel *panel, int param);
 int dsi_display_read_panel(struct dsi_panel *panel, struct dsi_read_config *read_config);
@@ -1508,16 +1504,6 @@ static int dsi_panel_parse_dfps_caps(struct dsi_panel *panel)
 		goto error;
 	}
 	dfps_caps->dfps_support = true;
-
-	if (dfps_caps->dfps_support) {
-		supported = utils->read_bool(utils->data,
-			"qcom,mdss-dsi-pan-enable-smart-fps");
-		if (supported) {
-			pr_debug("[%s] Smart DFPS is supported\n", name);
-			dfps_caps->smart_fps_support = true;
-		} else
-			dfps_caps->smart_fps_support = false;
-	}
 
 	/* calculate max and min fps */
 	dfps_caps->max_refresh_rate = dfps_caps->dfps_list[0];
@@ -3639,9 +3625,6 @@ struct dsi_panel *dsi_panel_get(struct device *parent,
 		pr_debug("failed to parse esd config, rc=%d\n", rc);
 
 	panel->power_mode = SDE_MODE_DPMS_OFF;
-
-	g_panel = panel;
-
 	drm_panel_init(&panel->drm_panel);
 	mutex_init(&panel->panel_lock);
 
@@ -4599,8 +4582,6 @@ static void handle_dsi_read_data(struct dsi_panel *panel, struct dsi_read_config
 	return;
 }
 
-
-
 static int panel_disp_param_send_lock(struct dsi_panel *panel, int param)
 {
 	int rc = 0;
@@ -4616,12 +4597,6 @@ static int panel_disp_param_send_lock(struct dsi_panel *panel, int param)
 	}
 
 	pr_debug("[LCD] param_type=%d\n", param);
-
-	/* set smart fps status */
-	if (param & 0xF0000000) {
-		fm_stat.enabled = param & 0x01;
-		pr_info("[LCD] smart dfps enable = [%d]\n", fm_stat.enabled);
-	}
 
 	temp = param & 0x0000000F;
 	switch (temp) {
@@ -4834,34 +4809,6 @@ static int panel_disp_param_send_lock(struct dsi_panel *panel, int param)
 	default:
 		break;
 	}
-
-	temp = param & 0xF0000000;
-	switch (temp) {
-	case DISPPARAM_DFPS_LEVEL1:
-		pr_info("DFPS:30fps\n");
-		panel->panel_max_frame_rate = false;
-		break;
-	case DISPPARAM_DFPS_LEVEL2:
-		pr_info("DFPS:45fps\n");
-		panel->panel_max_frame_rate = false;
-		break;
-	case DISPPARAM_DFPS_LEVEL3:
-		pr_info("DFPS:60fps\n");
-		panel->panel_max_frame_rate = false;
-		break;
-	case DISPPARAM_DFPS_LEVEL4:
-		pr_info("DFPS:90fps\n");
-		panel->panel_max_frame_rate = false;
-		break;
-	case DISPPARAM_DFPS_LEVEL5:
-		pr_info("DFPS:120fps\n");
-		panel->panel_max_frame_rate = true;
-		break;
-	default:
-		break;
-	}
-
-
 	mutex_unlock(&panel->panel_lock);
 	return rc;
 }
@@ -4944,10 +4891,6 @@ int dsi_panel_enable(struct dsi_panel *panel)
 		       panel->name, rc);
 	else
 		panel->panel_initialized = true;
-
-
-	idle_status = false;
-
 	mutex_unlock(&panel->panel_lock);
 
 	lcd_esd_enable(1);
