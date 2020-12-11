@@ -16,7 +16,7 @@ on property:vendor.post_boot.parsed=1
 # Enable ZRAM on boot_complete
     rm /data/unencrypted/zram_swap
     swapon_all /vendor/etc/fstab.qcom
-    write /proc/sys/vm/swappiness 30
+    write /proc/sys/vm/swappiness 50
     
 # Configure schedutil settings
     write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us 500
