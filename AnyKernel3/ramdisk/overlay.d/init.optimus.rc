@@ -1,3 +1,17 @@
+on boot
+# Set LMKD props
+    setprop ro.config.low_ram false
+    setprop ro.lmk.low 1001
+    setprop ro.lmk.medium 800
+    setprop ro.lmk.critical 0
+    setprop ro.lmk.critical_upgrade false
+    setprop ro.lmk.upgrade_pressure 100
+    setprop ro.lmk.downgrade_pressure 100
+    setprop ro.lmk.kill_heaviest_task true
+    setprop ro.lmk.kill_timeout_ms 100
+    setprop ro.lmk.use_minfree_levels true
+    setprop ro.lmk.log_stats true
+    
 on property:vendor.post_boot.parsed=1  
 # Enable ZRAM on boot_complete
     rm /data/unencrypted/zram_swap
