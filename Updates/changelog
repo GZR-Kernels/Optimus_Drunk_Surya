@@ -1,0 +1,5 @@
+* Updated to 4.14.212
+* Added FKM updater support
+* Disabled smart fps, phone will now stay at fps you set it too at all times
+* Removed low memory killer in favor of psi
+* Set swappiness to 50
