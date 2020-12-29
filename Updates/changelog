@@ -1,5 +1,5 @@
-* Updated to 4.14.212
-* Added FKM updater support
-* Disabled smart fps, phone will now stay at fps you set it too at all times
-* Removed low memory killer in favor of psi
-* Set swappiness to 50
+* Updated to 4.14.213
+* Updated wireguard to 1.0.20201221
+* Added Shadow Call Stack & Simple_LMK
+* Reduced zram to 2G
+* Set bbr as default TCP cong
