@@ -616,7 +616,6 @@ struct wcd_mbhc {
 	bool usbc_force_pr_mode;
 	struct wcd_mbhc_fn *mbhc_fn;
 	bool force_linein;
-	int usbc_mode;
 	struct device_node *fsa_np;
 	struct notifier_block fsa_nb;
 	struct notifier_block psy_nb;
