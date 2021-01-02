@@ -73,6 +73,7 @@ struct mhi_req {
 	struct list_head                list;
 	union mhi_dev_ring_element_type *el;
 	void (*client_cb)(void *req);
+	bool				is_stale;
 };
 
 /* SW channel client list */
@@ -134,6 +135,8 @@ enum mhi_client_channel {
 	MHI_CLIENT_IP_HW_0_IN = 101,
 	MHI_CLIENT_ADPL_IN = 102,
 	MHI_CLIENT_IP_HW_QDSS = 103,
+	MHI_CLIENT_IP_HW_1_OUT = 105,
+	MHI_CLIENT_IP_HW_1_IN = 106,
 	MHI_CLIENT_QMAP_FLOW_CTRL_OUT = 109,
 	MHI_CLIENT_QMAP_FLOW_CTRL_IN = 110,
 	MHI_MAX_CHANNELS = 255,

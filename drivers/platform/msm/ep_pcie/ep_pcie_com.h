@@ -196,6 +196,7 @@
 #define EP_PCIE_OATU_INDEX_MSI 1
 #define EP_PCIE_OATU_INDEX_CTRL 2
 #define EP_PCIE_OATU_INDEX_DATA 3
+#define EP_PCIE_OATU_INDEX_IPA_MSI 4
 
 #define EP_PCIE_OATU_UPPER 0x100
 
@@ -372,6 +373,7 @@ struct ep_pcie_dev_t {
 	u32                          dbi_base_reg;
 	u32                          slv_space_reg;
 	u32                          phy_status_reg;
+	u32			phy_status_bit_mask_bit;
 	u32                          phy_init_len;
 	u32			     mhi_soc_reset_offset;
 	struct ep_pcie_phy_info_t    *phy_init;
@@ -405,7 +407,6 @@ struct ep_pcie_dev_t {
 	bool                         config_mmio_init;
 	bool                         enumerated;
 	enum ep_pcie_link_status     link_status;
-	bool                         perst_deast;
 	bool                         power_on;
 	bool                         suspending;
 	bool                         l23_ready;
@@ -413,6 +414,10 @@ struct ep_pcie_dev_t {
 	struct ep_pcie_msi_config    msi_cfg;
 	bool                         no_notify;
 	bool                         client_ready;
+	atomic_t		     ep_pcie_dev_wake;
+	atomic_t                     perst_deast;
+	atomic_t                     host_wake_pending;
+	bool			     conf_ipa_msi_iatu;
 
 	struct ep_pcie_register_event *event_reg;
 	struct work_struct	     handle_perst_work;

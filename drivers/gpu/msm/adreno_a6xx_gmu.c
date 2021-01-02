@@ -843,12 +843,9 @@ static bool a6xx_gmu_gx_is_on(struct adreno_device *adreno_dev)
 static bool a6xx_gmu_cx_is_on(struct kgsl_device *device)
 {
 	unsigned int val;
-	struct gmu_device *gmu = KGSL_GMU_DEVICE(device);
 
-	if (device->state != KGSL_STATE_RESET &&
-		ADRENO_QUIRK(ADRENO_DEVICE(device),
-		ADRENO_QUIRK_CX_GDSC))
-		return regulator_is_enabled(gmu->cx_gdsc);
+	if (ADRENO_QUIRK(ADRENO_DEVICE(device), ADRENO_QUIRK_CX_GDSC))
+		return regulator_is_enabled(KGSL_GMU_DEVICE(device)->cx_gdsc);
 
 	gmu_core_regread(device, A6XX_GPU_CC_CX_GDSCR, &val);
 	return (val & BIT(31));
@@ -954,12 +951,9 @@ static int a6xx_gmu_wait_for_lowest_idle(struct adreno_device *adreno_dev)
 
 	/* Collect abort data to help with debugging */
 	gmu_core_regread(device, A6XX_GPU_GMU_AO_GPU_CX_BUSY_STATUS, &reg2);
-	kgsl_regread(device, A6XX_CP_STATUS_1, &reg3);
-	gmu_core_regread(device, A6XX_GMU_RBBM_INT_UNMASKED_STATUS, &reg4);
-	gmu_core_regread(device, A6XX_GMU_GMU_PWR_COL_KEEPALIVE, &reg5);
-	kgsl_regread(device, A6XX_CP_CP2GMU_STATUS, &reg6);
-	kgsl_regread(device, A6XX_CP_CONTEXT_SWITCH_CNTL, &reg7);
-	gmu_core_regread(device, A6XX_GMU_AO_SPARE_CNTL, &reg8);
+	gmu_core_regread(device, A6XX_GMU_RBBM_INT_UNMASKED_STATUS, &reg3);
+	gmu_core_regread(device, A6XX_GMU_GMU_PWR_COL_KEEPALIVE, &reg4);
+	gmu_core_regread(device, A6XX_GMU_AO_SPARE_CNTL, &reg5);
 
 	dev_err(&gmu->pdev->dev,
 		"----------------------[ GMU error ]----------------------\n");
@@ -969,14 +963,23 @@ static int a6xx_gmu_wait_for_lowest_idle(struct adreno_device *adreno_dev)
 		"Timestamps: %llx %llx %llx\n", ts1, ts2, ts3);
 	dev_err(&gmu->pdev->dev,
 		"RPMH_POWER_STATE=%x SPTPRAC_PWR_CLK_STATUS=%x\n", reg, reg1);
-	dev_err(&gmu->pdev->dev,
-		"CX_BUSY_STATUS=%x CP_STATUS_1=%x\n", reg2, reg3);
+	dev_err(&gmu->pdev->dev, "CX_BUSY_STATUS=%x\n", reg2);
 	dev_err(&gmu->pdev->dev,
 		"RBBM_INT_UNMASKED_STATUS=%x PWR_COL_KEEPALIVE=%x\n",
-		reg4, reg5);
-	dev_err(&gmu->pdev->dev,
-		"CP2GMU_STATUS=%x CONTEXT_SWITCH_CNTL=%x AO_SPARE_CNTL=%x\n",
-		reg6, reg7, reg8);
+		reg3, reg4);
+	dev_err(&gmu->pdev->dev, "A6XX_GMU_AO_SPARE_CNTL=%x\n", reg5);
+
+	/* Access GX registers only when GX is ON */
+	if (is_on(reg1)) {
+		kgsl_regread(device, A6XX_CP_STATUS_1, &reg6);
+		kgsl_regread(device, A6XX_CP_CP2GMU_STATUS, &reg7);
+		kgsl_regread(device, A6XX_CP_CONTEXT_SWITCH_CNTL, &reg8);
+
+		dev_err(&gmu->pdev->dev, "A6XX_CP_STATUS_1=%x\n", reg6);
+		dev_err(&gmu->pdev->dev,
+			"CP2GMU_STATUS=%x CONTEXT_SWITCH_CNTL=%x\n",
+			reg7, reg8);
+	}
 
 	WARN_ON(1);
 	return -ETIMEDOUT;
@@ -1152,6 +1155,39 @@ static int a6xx_gmu_load_firmware(struct kgsl_device *device)
 }
 
 #define A6XX_VBIF_XIN_HALT_CTRL1_ACKS   (BIT(0) | BIT(1) | BIT(2) | BIT(3))
+static void do_gbif_halt(struct kgsl_device *device, u32 reg, u32 ack_reg,
+	u32 mask, const char *client)
+{
+	u32 ack;
+	unsigned long t;
+
+	kgsl_regwrite(device, reg, mask);
+
+	t = jiffies + msecs_to_jiffies(100);
+	do {
+		kgsl_regread(device, ack_reg, &ack);
+		if ((ack & mask) == mask)
+			return;
+
+		/*
+		 * If we are attempting recovery in case of stall-on-fault
+		 * then the halt sequence will not complete as long as SMMU
+		 * is stalled.
+		 */
+		kgsl_mmu_pagefault_resume(&device->mmu);
+
+		usleep_range(10, 100);
+	} while (!time_after(jiffies, t));
+
+	/* Check one last time */
+	kgsl_mmu_pagefault_resume(&device->mmu);
+
+	kgsl_regread(device, ack_reg, &ack);
+	if ((ack & mask) == mask)
+		return;
+
+	dev_err(device->dev, "%s GBIF halt timed out\n", client);
+}
 
 static void a6xx_llm_glm_handshake(struct kgsl_device *device)
 {
@@ -1214,6 +1250,26 @@ static int a6xx_gmu_suspend(struct kgsl_device *device)
 
 	/* Check no outstanding RPMh voting */
 	a6xx_complete_rpmh_votes(device);
+
+	gmu_core_regwrite(device, A6XX_GMU_CM3_SYSRESET, 1);
+
+	if (adreno_has_gbif(adreno_dev)) {
+		struct adreno_gpudev *gpudev =
+			ADRENO_GPU_DEVICE(adreno_dev);
+
+		/* Halt GX traffic */
+		do_gbif_halt(device, A6XX_RBBM_GBIF_HALT,
+			A6XX_RBBM_GBIF_HALT_ACK, gpudev->gbif_gx_halt_mask,
+			"GX");
+		/* Halt CX traffic */
+		do_gbif_halt(device, A6XX_GBIF_HALT, A6XX_GBIF_HALT_ACK,
+			gpudev->gbif_arb_halt_mask, "CX");
+	}
+
+	kgsl_regwrite(device, A6XX_RBBM_SW_RESET_CMD, 0x1);
+
+	/* Allow the software reset to complete */
+	udelay(100);
 
 	/*
 	 * This is based on the assumption that GMU is the only one controlling

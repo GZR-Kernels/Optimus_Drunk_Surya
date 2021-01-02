@@ -592,7 +592,7 @@ void usb_sg_cancel(struct usb_sg_request *io)
 	}
 	/* shut everything down */
 	io->status = -ECONNRESET;
-        io->count++;		/* Keep the request alive until we're done */
+	io->count++;		/* Keep the request alive until we're done */
 	spin_unlock_irqrestore(&io->lock, flags);
 
 	for (i = io->entries - 1; i >= 0; --i) {
@@ -606,6 +606,7 @@ void usb_sg_cancel(struct usb_sg_request *io)
 			dev_warn(&io->dev->dev, "%s, unlink --> %d\n",
 				 __func__, retval);
 	}
+
 	spin_lock_irqsave(&io->lock, flags);
 	io->count--;
 	if (!io->count)
