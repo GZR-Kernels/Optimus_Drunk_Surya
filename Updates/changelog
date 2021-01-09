@@ -1,5 +1,4 @@
-* Updated to 4.14.213
-* Updated wireguard to 1.0.20201221
-* Added Shadow Call Stack & Simple_LMK
-* Reduced zram to 2G
-* Set bbr as default TCP cong
+* Updated to 4.14.214
+* Added cpuset & schedtune assist
+* Added sdfat filesystem
+* Some gpu optimisations
