@@ -1504,16 +1504,7 @@ static int dsi_panel_parse_dfps_caps(struct dsi_panel *panel)
 		goto error;
 	}
 	dfps_caps->dfps_support = true;
-
-	if (dfps_caps->dfps_support) {
-		supported = utils->read_bool(utils->data,
-			"qcom,mdss-dsi-pan-enable-smart-fps");
-		if (supported) {
-			pr_debug("[%s] Smart DFPS is supported\n", name);
-			dfps_caps->smart_fps_support = true;
-		} else
-			dfps_caps->smart_fps_support = false;
-	}
+	dfps_caps->smart_fps_support = false;
 
 	/* calculate max and min fps */
 	dfps_caps->max_refresh_rate = dfps_caps->dfps_list[0];
