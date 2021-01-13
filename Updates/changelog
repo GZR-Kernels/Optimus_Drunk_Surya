@@ -1,4 +1,1 @@
-* Updated to 4.14.214
-* Added cpuset & schedtune assist
-* Added sdfat filesystem
-* Some gpu optimisations
+* Updated to 4.14.215
