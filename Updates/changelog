@@ -1,1 +1,5 @@
-* Updated to 4.14.215
+* Updated to 4.14.216
+* Let display & top app be handled by big cluster cores
+* Lot's of cpu & gpu relates fixes
+* Mark some services as performance critical
+* Improve boottime and wakelock timeout
