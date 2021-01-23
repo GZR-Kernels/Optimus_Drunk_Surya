@@ -210,4 +210,4 @@ config DRM_SDE_RSC
 config FENCE_DEBUG
 	bool "Print fence name to userspace"
 	depends on DRM_MSM
-	default n
+	default n	
