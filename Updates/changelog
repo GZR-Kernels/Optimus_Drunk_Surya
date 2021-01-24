@@ -1,5 +1,3 @@
-* Updated to 4.14.216
-* Let display & top app be handled by big cluster cores
-* Lot's of cpu & gpu relates fixes
-* Mark some services as performance critical
-* Improve boottime and wakelock timeout
+* Updated to 4.14.217
+* Updated wireguard to 1.0.20210124
+* Removed klapse
