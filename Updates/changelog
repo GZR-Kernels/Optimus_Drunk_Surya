@@ -1,3 +1,2 @@
-* Updated to 4.14.217
-* Updated wireguard to 1.0.20210124
-* Removed klapse
+* Updated to 4.14.218
+* Fixed charging not showing right current
