@@ -1,5 +1,5 @@
-* Updated to 4.14.212
-* Added FKM updater support
-* Disabled smart fps, phone will now stay at fps you set it too at all times
-* Removed low memory killer in favor of psi
-* Set swappiness to 50
+* Debased to a v11.4 base
+* Wireguard updated to 1.0.20210219
+* Removed schedtune & cpuset assist and other stuff I added since then
+* Newly added governors, tcp etc. are still here
+* Linux tag is also still 4.14.221
