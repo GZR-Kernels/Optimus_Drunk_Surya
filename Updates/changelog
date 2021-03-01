@@ -1,1 +1,2 @@
-* Updated to 4.14.222
+* Optimisations for performance, battery and cpu cluster load
+* Also disabled spectre & meltdown mitigations for better performance
