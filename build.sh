@@ -1,56 +1,74 @@
 #!/bin/bash
-#
-# Compile script for QuicksilveR kernel
-# Copyright (C) 2020-2021 Adithya R.
 
-SECONDS=0 # builtin bash timer
-ZIPNAME="QuicksilveR-surya-$(date '+%Y%m%d-%H%M').zip"
-TC_DIR="$HOME/tc/proton-clang"
-DEFCONFIG="vendor/surya-perf_defconfig"
+#set -e
 
-export PATH="$TC_DIR/bin:$PATH"
+## Copy this script inside the kernel directory
+KERNEL_DEFCONFIG=vendor/surya_defconfig
+ANYKERNEL3_DIR=$PWD/AnyKernel3/
+FINAL_KERNEL_ZIP=Optimus_Drunk_Surya_rebase.zip
+export PATH="$KERNELDIR/prebuilts/proton-clang/bin:${PATH}"
+export ARCH=arm64
+export SUBARCH=arm64
+export KBUILD_COMPILER_STRING="$($KERNELDIR/prebuilts/proton-clang/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
+# Speed up build process
+MAKE="./makeparallel"
 
-if ! [ -d "$TC_DIR" ]; then
-echo "Proton clang not found! Cloning to $TC_DIR..."
-if ! git clone -q --depth=1 --single-branch https://github.com/kdrag0n/proton-clang $TC_DIR; then
-echo "Cloning failed! Aborting..."
-exit 1
-fi
-fi
+BUILD_START=$(date +"%s")
+blue='\033[0;34m'
+cyan='\033[0;36m'
+yellow='\033[0;33m'
+red='\033[0;31m'
+nocol='\033[0m'
 
-export KBUILD_BUILD_USER=adithya
-export KBUILD_BUILD_HOST=ghostrider_reborn
-
-if [[ $1 = "-c" || $1 = "--clean" ]]; then
-rm -rf out
-fi
-
+# Clean build always lol
+echo "**** Cleaning ****"
 mkdir -p out
-make O=out ARCH=arm64 $DEFCONFIG
+make O=out clean
 
-echo -e "\nStarting compilation...\n"
-make -j$(nproc --all) O=out ARCH=arm64 CC=clang LD=ld.lld AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- Image.gz-dtb dtbo.img
+echo "**** Kernel defconfig is set to $KERNEL_DEFCONFIG ****"
+echo -e "$blue***********************************************"
+echo "          BUILDING KERNEL          "
+echo -e "***********************************************$nocol"
+make $KERNEL_DEFCONFIG O=out
+make -j$(nproc --all) O=out \
+                      ARCH=arm64 \
+                      CC=clang \
+                      CROSS_COMPILE=aarch64-linux-gnu- \
+                      CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
+                      NM=llvm-nm \
+                      OBJCOPY=llvm-objcopy \
+                      OBJDUMP=llvm-objdump \
+                      STRIP=llvm-strip
 
-if [ -f "out/arch/arm64/boot/Image.gz-dtb" ] && [ -f "out/arch/arm64/boot/dtbo.img" ]; then
-echo -e "\nKernel compiled succesfully! Zipping up...\n"
-if ! git clone -q https://github.com/ghostrider-reborn/AnyKernel3 -b surya; then
-echo -e "\nCloning AnyKernel3 repo failed! Aborting..."
-exit 1
-fi
-cp out/arch/arm64/boot/Image.gz-dtb AnyKernel3
-cp out/arch/arm64/boot/dtbo.img AnyKernel3
-rm -f *zip
-cd AnyKernel3
-zip -r9 "../$ZIPNAME" * -x '*.git*' README.md *placeholder
+echo "**** Verify Image.gz-dtb & dtbo.img ****"
+ls $PWD/out/arch/arm64/boot/Image.gz-dtb
+ls $PWD/out/arch/arm64/boot/dtbo.img
+
+# Anykernel 3 time!!
+echo "**** Verifying AnyKernel3 Directory ****"
+ls $ANYKERNEL3_DIR
+echo "**** Removing leftovers ****"
+rm -rf $ANYKERNEL3_DIR/Image.gz-dtb
+rm -rf $ANYKERNEL3_DIR/dtbo.img
+rm -rf $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP
+
+echo "**** Copying Image.gz-dtb & dtbo.img ****"
+cp $PWD/out/arch/arm64/boot/Image.gz-dtb $ANYKERNEL3_DIR/
+cp $PWD/out/arch/arm64/boot/dtbo.img $ANYKERNEL3_DIR/
+
+echo "**** Time to zip up! ****"
+cd $ANYKERNEL3_DIR/
+zip -r9 $FINAL_KERNEL_ZIP * -x README $FINAL_KERNEL_ZIP
+cp $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP $KERNELDIR/$FINAL_KERNEL_ZIP
+
+echo "**** Done, here is your sha1 ****"
 cd ..
-rm -rf AnyKernel3
-echo -e "\nCompleted in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s) !"
-if command -v gdrive &> /dev/null; then
-gdrive upload --share $ZIPNAME
-else
-echo "Zip: $ZIPNAME"
-fi
-rm -rf out/arch/arm64/boot
-else
-echo -e "\nCompilation failed!"
-fi
+rm -rf $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP
+rm -rf $ANYKERNEL3_DIR/Image.gz-dtb
+rm -rf $ANYKERNEL3_DIR/dtbo.img
+rm -rf out/
+
+BUILD_END=$(date +"%s")
+DIFF=$(($BUILD_END - $BUILD_START))
+echo -e "$yellow Build completed in $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.$nocol"
+sha1sum $KERNELDIR/$FINAL_KERNEL_ZIP
