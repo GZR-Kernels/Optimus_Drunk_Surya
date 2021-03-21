@@ -1,2 +1,4 @@
-* Updated to 4.14.226
-* Some ufs & thermal fixes
+* Rebased on ghost-reborn's kernel
+* Copied most of those kernel settings & dynamic stune boost
+* No more upstream for now, breaks some important stuff lately
+* All other features are still here
