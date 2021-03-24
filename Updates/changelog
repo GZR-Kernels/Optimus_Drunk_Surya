@@ -1,4 +1,3 @@
-* Rebased on ghost-reborn's kernel
-* Copied most of those kernel settings & dynamic stune boost
-* No more upstream for now, breaks some important stuff lately
-* All other features are still here
+* Updated to 4.14.227
+* Disable power efficient wq
+* Increased zram size to 3gb
