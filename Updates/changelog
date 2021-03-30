@@ -1,3 +1,3 @@
-* Updated to 4.14.227
-* Disable power efficient wq
-* Increased zram size to 3gb
+* Updated to 4.14.228
+* Adjust Simple LMK
+* Some zram fixes
