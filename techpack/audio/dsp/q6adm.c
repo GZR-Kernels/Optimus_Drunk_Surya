@@ -49,6 +49,9 @@
 #define DS2_ADM_COPP_TOPOLOGY_ID 0xFFFFFFFF
 #endif
 
+#define APPTYPE_GENERAL_PLAYBACK 0x00011130
+#define APPTYPE_SYSTEM_SOUNDS 0x00011131
+
 /* ENUM for adm_status */
 enum adm_cal_status {
 	ADM_STATUS_CALIBRATION_REQUIRED = 0,
@@ -2853,6 +2856,12 @@ int adm_open(int port_id, int path, int rate, int channel_mode, int topology,
 	pr_debug("%s:port %#x path:%d rate:%d mode:%d perf_mode:%d,topo_id %d\n",
 		 __func__, port_id, path, rate, channel_mode, perf_mode,
 		 topology);
+	
+	if (path == ADM_PATH_PLAYBACK || app_type == APPTYPE_GENERAL_PLAYBACK ||
+	    app_type == APPTYPE_SYSTEM_SOUNDS) {
+		pr_info("%s: Force 24-bits audio for APPTYPE 0x%x\n", __func__, app_type);
+		bit_width = 24;
+	}
 
 	port_id = q6audio_convert_virtual_to_portid(port_id);
 	port_idx = adm_validate_and_get_port_index(port_id);
