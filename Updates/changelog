@@ -1,3 +1,3 @@
-* Rebased on Ghost Reborn's CAF kernel
-* Only works on OSS vendor roms
-* No upstream
+* Added Simple LMK
+* Updated wireguard to 1.0.20210424
+* SOme small power optimisations
