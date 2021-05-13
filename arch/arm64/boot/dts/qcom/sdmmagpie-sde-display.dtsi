@@ -807,7 +807,7 @@
 	qcom,esd-err-int-gpio = <&tlmm 4 0>;
 	qcom,mdss-dsi-t-clk-post = <0x04>;
 	qcom,mdss-dsi-t-clk-pre = <0x26>;
-	qcom,dsi-supported-dfps-list = <120 90 60 50 30>;
+	qcom,dsi-supported-dfps-list = <120 90 60>;
 	qcom,mdss-dsi-pan-enable-dynamic-fps;
 	qcom,mdss-dsi-pan-fps-update = "dfps_immediate_porch_mode_vfp";
 	qcom,mdss-dsi-display-timings {
@@ -824,7 +824,7 @@
 	qcom,esd-err-int-gpio = <&tlmm 4 0>;
 	qcom,mdss-dsi-t-clk-post = <0x04>;
 	qcom,mdss-dsi-t-clk-pre = <0x26>;
-	qcom,dsi-supported-dfps-list = <120 90 60 50 30>;
+	qcom,dsi-supported-dfps-list = <120 90 60>;
 	qcom,mdss-dsi-pan-enable-dynamic-fps;
 	qcom,mdss-dsi-pan-fps-update = "dfps_immediate_porch_mode_vfp";
 	qcom,mdss-dsi-display-timings {
