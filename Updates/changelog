@@ -1,3 +1,4 @@
-* Increased zram size to 3gb
-* Only force UX tasks to big cores
-* Some minor fixes for ufs and safetynet
+* Enabled cpu input boost, cpuset & stune assist
+* Removed dynamic stune boost
+* Zram is back to 2GB
+* Add more cpu scheduling 
