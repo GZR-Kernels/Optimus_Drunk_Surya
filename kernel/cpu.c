@@ -960,6 +960,11 @@ static int __ref _cpu_down(unsigned int cpu, int tasks_frozen,
 	int prev_state, ret = 0;
 	u64 start_time = 0;
 
+    if (cpu == 0 || cpu == 1) {
+        // Workaround xiaomi thermals (actually battery level 5) bug where they offline cpu0&cpu1 instead of 6&7
+        return -EBUSY;
+    }
+
 	if (num_online_cpus() == 1)
 		return -EBUSY;
 
