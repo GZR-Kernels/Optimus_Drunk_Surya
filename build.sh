@@ -54,8 +54,10 @@ if [ -f "$kernel" ] && [ -f "$dtb" ] && [ -f "$dtbo" ]; then
 	rm -rf AnyKernel3
 	echo -e "\nCompleted in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s) !"
 	echo "Zip: $ZIPNAME"
-	curl --upload-file "$ZIPNAME" http://transfer.sh/"$ZIPNAME"
-	echo
+	if ! [[ $HOSTNAME = "RyzenBeast" && $USER = "adithya" ]]; then
+		curl --upload-file "$ZIPNAME" http://transfer.sh/"$ZIPNAME"
+		echo
+	fi
 else
 	echo -e "\nCompilation failed!"
 fi
