@@ -1,4 +1,2 @@
-* Enabled cpu input boost, cpuset & stune assist
-* Removed dynamic stune boost
-* Zram is back to 2GB
-* Add more cpu scheduling 
+* Reverted back to old base (fixes system hanging on <5% battery)
+* Disable prefer idle for foreground apps
