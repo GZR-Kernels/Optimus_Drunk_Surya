@@ -1464,14 +1464,15 @@ static int dsi_panel_parse_dfps_caps(struct dsi_panel *panel)
 		goto error;
 	}
 
-	dfps_caps->dfps_list_len = 3;
+	dfps_caps->dfps_list_len = 4;
 
 	dfps_caps->dfps_list = kcalloc(dfps_caps->dfps_list_len, sizeof(u32),
 			GFP_KERNEL);
 
-	dfps_caps->dfps_list[0] = 60;
-	dfps_caps->dfps_list[1] = 90;
-	dfps_caps->dfps_list[2] = 120;
+	dfps_caps->dfps_list[0] = 30;
+	dfps_caps->dfps_list[1] = 120;
+	dfps_caps->dfps_list[2] = 90;
+	dfps_caps->dfps_list[3] = 60;
 
 	dfps_caps->dfps_support = true;
 
