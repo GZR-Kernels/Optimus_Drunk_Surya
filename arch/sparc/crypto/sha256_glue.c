@@ -169,6 +169,7 @@ static struct shash_alg sha256 = {
 		.cra_name	=	"sha256",
 		.cra_driver_name=	"sha256-sparc64",
 		.cra_priority	=	SPARC_CR_OPCODE_PRIORITY,
+		.cra_flags	=	CRYPTO_ALG_TYPE_SHASH,
 		.cra_blocksize	=	SHA256_BLOCK_SIZE,
 		.cra_module	=	THIS_MODULE,
 	}
@@ -184,6 +185,7 @@ static struct shash_alg sha224 = {
 		.cra_name	=	"sha224",
 		.cra_driver_name=	"sha224-sparc64",
 		.cra_priority	=	SPARC_CR_OPCODE_PRIORITY,
+		.cra_flags	=	CRYPTO_ALG_TYPE_SHASH,
 		.cra_blocksize	=	SHA224_BLOCK_SIZE,
 		.cra_module	=	THIS_MODULE,
 	}

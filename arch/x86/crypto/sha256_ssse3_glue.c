@@ -109,6 +109,7 @@ static struct shash_alg sha256_ssse3_algs[] = { {
 		.cra_name	=	"sha256",
 		.cra_driver_name =	"sha256-ssse3",
 		.cra_priority	=	150,
+		.cra_flags	=	CRYPTO_ALG_TYPE_SHASH,
 		.cra_blocksize	=	SHA256_BLOCK_SIZE,
 		.cra_module	=	THIS_MODULE,
 	}
@@ -123,6 +124,7 @@ static struct shash_alg sha256_ssse3_algs[] = { {
 		.cra_name	=	"sha224",
 		.cra_driver_name =	"sha224-ssse3",
 		.cra_priority	=	150,
+		.cra_flags	=	CRYPTO_ALG_TYPE_SHASH,
 		.cra_blocksize	=	SHA224_BLOCK_SIZE,
 		.cra_module	=	THIS_MODULE,
 	}
@@ -175,6 +177,7 @@ static struct shash_alg sha256_avx_algs[] = { {
 		.cra_name	=	"sha256",
 		.cra_driver_name =	"sha256-avx",
 		.cra_priority	=	160,
+		.cra_flags	=	CRYPTO_ALG_TYPE_SHASH,
 		.cra_blocksize	=	SHA256_BLOCK_SIZE,
 		.cra_module	=	THIS_MODULE,
 	}
@@ -189,6 +192,7 @@ static struct shash_alg sha256_avx_algs[] = { {
 		.cra_name	=	"sha224",
 		.cra_driver_name =	"sha224-avx",
 		.cra_priority	=	160,
+		.cra_flags	=	CRYPTO_ALG_TYPE_SHASH,
 		.cra_blocksize	=	SHA224_BLOCK_SIZE,
 		.cra_module	=	THIS_MODULE,
 	}
@@ -257,6 +261,7 @@ static struct shash_alg sha256_avx2_algs[] = { {
 		.cra_name	=	"sha256",
 		.cra_driver_name =	"sha256-avx2",
 		.cra_priority	=	170,
+		.cra_flags	=	CRYPTO_ALG_TYPE_SHASH,
 		.cra_blocksize	=	SHA256_BLOCK_SIZE,
 		.cra_module	=	THIS_MODULE,
 	}
@@ -271,6 +276,7 @@ static struct shash_alg sha256_avx2_algs[] = { {
 		.cra_name	=	"sha224",
 		.cra_driver_name =	"sha224-avx2",
 		.cra_priority	=	170,
+		.cra_flags	=	CRYPTO_ALG_TYPE_SHASH,
 		.cra_blocksize	=	SHA224_BLOCK_SIZE,
 		.cra_module	=	THIS_MODULE,
 	}
@@ -337,6 +343,7 @@ static struct shash_alg sha256_ni_algs[] = { {
 		.cra_name	=	"sha256",
 		.cra_driver_name =	"sha256-ni",
 		.cra_priority	=	250,
+		.cra_flags	=	CRYPTO_ALG_TYPE_SHASH,
 		.cra_blocksize	=	SHA256_BLOCK_SIZE,
 		.cra_module	=	THIS_MODULE,
 	}
@@ -351,6 +358,7 @@ static struct shash_alg sha256_ni_algs[] = { {
 		.cra_name	=	"sha224",
 		.cra_driver_name =	"sha224-ni",
 		.cra_priority	=	250,
+		.cra_flags	=	CRYPTO_ALG_TYPE_SHASH,
 		.cra_blocksize	=	SHA224_BLOCK_SIZE,
 		.cra_module	=	THIS_MODULE,
 	}

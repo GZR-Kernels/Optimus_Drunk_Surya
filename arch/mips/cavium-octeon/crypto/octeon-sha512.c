@@ -235,6 +235,7 @@ static struct shash_alg octeon_sha512_algs[2] = { {
 		.cra_name	=	"sha512",
 		.cra_driver_name=	"octeon-sha512",
 		.cra_priority	=	OCTEON_CR_OPCODE_PRIORITY,
+		.cra_flags	=	CRYPTO_ALG_TYPE_SHASH,
 		.cra_blocksize	=	SHA512_BLOCK_SIZE,
 		.cra_module	=	THIS_MODULE,
 	}
@@ -248,6 +249,7 @@ static struct shash_alg octeon_sha512_algs[2] = { {
 		.cra_name	=	"sha384",
 		.cra_driver_name=	"octeon-sha384",
 		.cra_priority	=	OCTEON_CR_OPCODE_PRIORITY,
+		.cra_flags	=	CRYPTO_ALG_TYPE_SHASH,
 		.cra_blocksize	=	SHA384_BLOCK_SIZE,
 		.cra_module	=	THIS_MODULE,
 	}

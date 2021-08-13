@@ -58,22 +58,24 @@
 	sha1su1		v\s0\().4s, v\s3\().4s
 	.endm
 
-	.macro		loadrc, k, val, tmp
-	movz		\tmp, :abs_g0_nc:\val
-	movk		\tmp, :abs_g1:\val
-	dup		\k, \tmp
-	.endm
+	/*
+	 * The SHA1 round constants
+	 */
+	.align		4
+.Lsha1_rcon:
+	.word		0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6
 
 	/*
-	 * int sha1_ce_transform(struct sha1_ce_state *sst, u8 const *src,
-	 *			 int blocks)
+	 * void sha1_ce_transform(struct sha1_ce_state *sst, u8 const *src,
+	 *			  int blocks)
 	 */
-SYM_FUNC_START(sha1_ce_transform)
+ENTRY(sha1_ce_transform)
 	/* load round constants */
-	loadrc		k0.4s, 0x5a827999, w6
-	loadrc		k1.4s, 0x6ed9eba1, w6
-	loadrc		k2.4s, 0x8f1bbcdc, w6
-	loadrc		k3.4s, 0xca62c1d6, w6
+	adr		x6, .Lsha1_rcon
+	ld1r		{k0.4s}, [x6], #4
+	ld1r		{k1.4s}, [x6], #4
+	ld1r		{k2.4s}, [x6], #4
+	ld1r		{k3.4s}, [x6]
 
 	/* load state */
 	ld1		{dgav.4s}, [x0]
@@ -123,16 +125,14 @@ CPU_LE(	rev32		v11.16b, v11.16b	)
 	add		dgbv.2s, dgbv.2s, dg1v.2s
 	add		dgav.4s, dgav.4s, dg0v.4s
 
-	cbz		w2, 2f
-	cond_yield	3f, x5
-	b		0b
+	cbnz		w2, 0b
 
 	/*
 	 * Final block: add padding and total bit count.
 	 * Skip if the input size was not a round multiple of the block size,
 	 * the padding is handled by the C code in that case.
 	 */
-2:	cbz		x4, 3f
+	cbz		x4, 3f
 	ldr_l		w4, sha1_ce_offsetof_count, x4
 	ldr		x4, [x0, x4]
 	movi		v9.2d, #0
@@ -148,6 +148,5 @@ CPU_LE(	rev32		v11.16b, v11.16b	)
 	/* store new state */
 3:	st1		{dgav.4s}, [x0]
 	str		dgb, [x0, #16]
-	mov		w0, w2
 	ret
-SYM_FUNC_END(sha1_ce_transform)
+ENDPROC(sha1_ce_transform)

@@ -14,7 +14,6 @@
 #include <asm/neon.h>
 #include <asm/simd.h>
 #include <crypto/internal/hash.h>
-#include <crypto/internal/simd.h>
 #include <crypto/sha.h>
 #include <crypto/sha256_base.h>
 #include <linux/cryptohash.h>
@@ -32,66 +31,57 @@ asmlinkage void sha256_block_data_order(u32 *digest, const void *data,
 					unsigned int num_blks);
 EXPORT_SYMBOL(sha256_block_data_order);
 
-static void __sha256_block_data_order(struct sha256_state *sst, u8 const *src,
-				      int blocks)
-{
-	sha256_block_data_order(sst->state, src, blocks);
-}
-
 asmlinkage void sha256_block_neon(u32 *digest, const void *data,
 				  unsigned int num_blks);
 
-static void __sha256_block_neon(struct sha256_state *sst, u8 const *src,
-				int blocks)
-{
-	sha256_block_neon(sst->state, src, blocks);
-}
-
-static int crypto_sha256_arm64_update(struct shash_desc *desc, const u8 *data,
-				      unsigned int len)
+static int sha256_update(struct shash_desc *desc, const u8 *data,
+			 unsigned int len)
 {
 	return sha256_base_do_update(desc, data, len,
-				     __sha256_block_data_order);
+				(sha256_block_fn *)sha256_block_data_order);
 }
 
-static int crypto_sha256_arm64_finup(struct shash_desc *desc, const u8 *data,
-				     unsigned int len, u8 *out)
+static int sha256_finup(struct shash_desc *desc, const u8 *data,
+			unsigned int len, u8 *out)
 {
 	if (len)
 		sha256_base_do_update(desc, data, len,
-				      __sha256_block_data_order);
-	sha256_base_do_finalize(desc, __sha256_block_data_order);
+				(sha256_block_fn *)sha256_block_data_order);
+	sha256_base_do_finalize(desc,
+				(sha256_block_fn *)sha256_block_data_order);
 
 	return sha256_base_finish(desc, out);
 }
 
-static int crypto_sha256_arm64_final(struct shash_desc *desc, u8 *out)
+static int sha256_final(struct shash_desc *desc, u8 *out)
 {
-	return crypto_sha256_arm64_finup(desc, NULL, 0, out);
+	return sha256_finup(desc, NULL, 0, out);
 }
 
 static struct shash_alg algs[] = { {
 	.digestsize		= SHA256_DIGEST_SIZE,
 	.init			= sha256_base_init,
-	.update			= crypto_sha256_arm64_update,
-	.final			= crypto_sha256_arm64_final,
-	.finup			= crypto_sha256_arm64_finup,
+	.update			= sha256_update,
+	.final			= sha256_final,
+	.finup			= sha256_finup,
 	.descsize		= sizeof(struct sha256_state),
 	.base.cra_name		= "sha256",
 	.base.cra_driver_name	= "sha256-arm64",
-	.base.cra_priority	= 125,
+	.base.cra_priority	= 100,
+	.base.cra_flags		= CRYPTO_ALG_TYPE_SHASH,
 	.base.cra_blocksize	= SHA256_BLOCK_SIZE,
 	.base.cra_module	= THIS_MODULE,
 }, {
 	.digestsize		= SHA224_DIGEST_SIZE,
 	.init			= sha224_base_init,
-	.update			= crypto_sha256_arm64_update,
-	.final			= crypto_sha256_arm64_final,
-	.finup			= crypto_sha256_arm64_finup,
+	.update			= sha256_update,
+	.final			= sha256_final,
+	.finup			= sha256_finup,
 	.descsize		= sizeof(struct sha256_state),
 	.base.cra_name		= "sha224",
 	.base.cra_driver_name	= "sha224-arm64",
-	.base.cra_priority	= 125,
+	.base.cra_priority	= 100,
+	.base.cra_flags		= CRYPTO_ALG_TYPE_SHASH,
 	.base.cra_blocksize	= SHA224_BLOCK_SIZE,
 	.base.cra_module	= THIS_MODULE,
 } };
@@ -99,31 +89,21 @@ static struct shash_alg algs[] = { {
 static int sha256_update_neon(struct shash_desc *desc, const u8 *data,
 			      unsigned int len)
 {
-	struct sha256_state *sctx = shash_desc_ctx(desc);
-
+	/*
+	 * Stacking and unstacking a substantial slice of the NEON register
+	 * file may significantly affect performance for small updates when
+	 * executing in interrupt context, so fall back to the scalar code
+	 * in that case.
+	 */
 	if (!may_use_simd())
 		return sha256_base_do_update(desc, data, len,
-				__sha256_block_data_order);
+				(sha256_block_fn *)sha256_block_data_order);
 
-	while (len > 0) {
-		unsigned int chunk = len;
+	kernel_neon_begin();
+	sha256_base_do_update(desc, data, len,
+				(sha256_block_fn *)sha256_block_neon);
+	kernel_neon_end();
 
-		/*
-		 * Don't hog the CPU for the entire time it takes to process all
-		 * input when running on a preemptible kernel, but process the
-		 * data block by block instead.
-		 */
-		if (IS_ENABLED(CONFIG_PREEMPT) &&
-		    chunk + sctx->count % SHA256_BLOCK_SIZE > SHA256_BLOCK_SIZE)
-			chunk = SHA256_BLOCK_SIZE -
-				sctx->count % SHA256_BLOCK_SIZE;
-
-		kernel_neon_begin();
-		sha256_base_do_update(desc, data, chunk, __sha256_block_neon);
-		kernel_neon_end();
-		data += chunk;
-		len -= chunk;
-	}
 	return 0;
 }
 
@@ -133,13 +113,16 @@ static int sha256_finup_neon(struct shash_desc *desc, const u8 *data,
 	if (!may_use_simd()) {
 		if (len)
 			sha256_base_do_update(desc, data, len,
-				__sha256_block_data_order);
-		sha256_base_do_finalize(desc, __sha256_block_data_order);
+				(sha256_block_fn *)sha256_block_data_order);
+		sha256_base_do_finalize(desc,
+				(sha256_block_fn *)sha256_block_data_order);
 	} else {
-		if (len)
-			sha256_update_neon(desc, data, len);
 		kernel_neon_begin();
-		sha256_base_do_finalize(desc, __sha256_block_neon);
+		if (len)
+			sha256_base_do_update(desc, data, len,
+				(sha256_block_fn *)sha256_block_neon);
+		sha256_base_do_finalize(desc,
+				(sha256_block_fn *)sha256_block_neon);
 		kernel_neon_end();
 	}
 	return sha256_base_finish(desc, out);
@@ -160,6 +143,7 @@ static struct shash_alg neon_algs[] = { {
 	.base.cra_name		= "sha256",
 	.base.cra_driver_name	= "sha256-arm64-neon",
 	.base.cra_priority	= 150,
+	.base.cra_flags		= CRYPTO_ALG_TYPE_SHASH,
 	.base.cra_blocksize	= SHA256_BLOCK_SIZE,
 	.base.cra_module	= THIS_MODULE,
 }, {
@@ -172,6 +156,7 @@ static struct shash_alg neon_algs[] = { {
 	.base.cra_name		= "sha224",
 	.base.cra_driver_name	= "sha224-arm64-neon",
 	.base.cra_priority	= 150,
+	.base.cra_flags		= CRYPTO_ALG_TYPE_SHASH,
 	.base.cra_blocksize	= SHA224_BLOCK_SIZE,
 	.base.cra_module	= THIS_MODULE,
 } };
@@ -182,7 +167,7 @@ static int __init sha256_mod_init(void)
 	if (ret)
 		return ret;
 
-	if (cpu_have_named_feature(ASIMD)) {
+	if (elf_hwcap & HWCAP_ASIMD) {
 		ret = crypto_register_shashes(neon_algs, ARRAY_SIZE(neon_algs));
 		if (ret)
 			crypto_unregister_shashes(algs, ARRAY_SIZE(algs));
@@ -192,7 +177,7 @@ static int __init sha256_mod_init(void)
 
 static void __exit sha256_mod_fini(void)
 {
-	if (cpu_have_named_feature(ASIMD))
+	if (elf_hwcap & HWCAP_ASIMD)
 		crypto_unregister_shashes(neon_algs, ARRAY_SIZE(neon_algs));
 	crypto_unregister_shashes(algs, ARRAY_SIZE(algs));
 }

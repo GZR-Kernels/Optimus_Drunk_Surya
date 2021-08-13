@@ -12,7 +12,6 @@
 #include <crypto/sha.h>
 #include <linux/crypto.h>
 #include <linux/module.h>
-#include <linux/string.h>
 
 #include <asm/unaligned.h>
 
@@ -127,6 +126,6 @@ static inline int sha512_base_finish(struct shash_desc *desc, u8 *out)
 	for (i = 0; digest_size > 0; i++, digest_size -= sizeof(__be64))
 		put_unaligned_be64(sctx->state[i], digest++);
 
-	memzero_explicit(sctx, sizeof(*sctx));
+	*sctx = (struct sha512_state){};
 	return 0;
 }

@@ -137,6 +137,7 @@ static struct shash_alg alg256 = {
 	.base		=	{
 		.cra_name		=	"skein256",
 		.cra_driver_name	=	"skein",
+		.cra_flags		=	CRYPTO_ALG_TYPE_SHASH,
 		.cra_blocksize		=	SKEIN_256_BLOCK_BYTES,
 		.cra_module		=	THIS_MODULE,
 	}
@@ -154,6 +155,7 @@ static struct shash_alg alg512 = {
 	.base		=	{
 		.cra_name		=	"skein512",
 		.cra_driver_name	=	"skein",
+		.cra_flags		=	CRYPTO_ALG_TYPE_SHASH,
 		.cra_blocksize		=	SKEIN_512_BLOCK_BYTES,
 		.cra_module		=	THIS_MODULE,
 	}
@@ -171,6 +173,7 @@ static struct shash_alg alg1024 = {
 	.base		=	{
 		.cra_name		=	"skein1024",
 		.cra_driver_name	=	"skein",
+		.cra_flags		=	CRYPTO_ALG_TYPE_SHASH,
 		.cra_blocksize		=	SKEIN_1024_BLOCK_BYTES,
 		.cra_module		=	THIS_MODULE,
 	}
