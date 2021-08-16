@@ -1,2 +1,4 @@
-* Reverted back to old base (fixes system hanging on <5% battery)
-* Disable prefer idle for foreground apps
+* Hardcoded refresh rate options to 30, 60, 90 & 120hz
+* Enabled better and fast deep sleep
+* Force 24-bit and 320kbps audio
+* Some other small fixes
