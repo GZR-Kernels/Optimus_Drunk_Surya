@@ -1,4 +1,2 @@
-* Hardcoded refresh rate options to 30, 60, 90 & 120hz
-* Enabled better and fast deep sleep
-* Force 24-bit and 320kbps audio
-* Some other small fixes
+* Some fixes for thermal driver (hopefully fixes issues on <5% battery)
+* Adjusted cpu input boost
