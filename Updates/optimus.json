@@ -1,11 +1,11 @@
  {
   "kernel": {
     "name": "Optimus Drunk Surya",
-    "version": "v11.31",
-    "link": "https://github.com/GZR-Kernels/Optimus_Drunk_Surya/releases/download/v11.31/Optimus_Drunk_Surya_v11.31.zip",
+    "version": "v11.32",
+    "link": "https://github.com/GZR-Kernels/Optimus_Drunk_Surya/releases/download/v11.32/Optimus_Drunk_Surya_v11.32.zip",
     "changelog_url": "https://raw.githubusercontent.com/GZR-Kernels/Optimus_Drunk_Surya/11.0/Updates/changelog",
-    "date": "2021-08-16",
-    "sha1": "a8ff81d3be87da1d3132ff4b5563976f3674d85e"
+    "date": "2021-08-17",
+    "sha1": "bf03bd6fed00d096ee6f39ab834f03f0ecc72d94"
   },
   "support": {
     "link": "https://forum.xda-developers.com/t/kernel-surya-10-11-optimus-drunk-kernel-v11-2-4-14-211-08-12.4198627/"
