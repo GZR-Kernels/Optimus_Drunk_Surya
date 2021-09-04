@@ -1,2 +1,4 @@
-* Some fixes for thermal driver (hopefully fixes issues on <5% battery)
-* Adjusted cpu input boost
+* Added support for High Brightness & CABC mode
+* Also added support for adjusting haptics
+* Adjusted schedutil up & down rate limit
+* Some other small fixes
