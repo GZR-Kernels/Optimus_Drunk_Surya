@@ -1,4 +1,6 @@
-* Added support for High Brightness & CABC mode
-* Also added support for adjusting haptics
-* Adjusted schedutil up & down rate limit
-* Some other small fixes
+* Source cleanup
+* Removed refresh rate hardcode
+* Added KCAL & vibration control
+* Set schedutil up/down rate limit to 1000
+* Other small updates & fixes
+
