@@ -1,2 +1,3 @@
-* Rebased kernel on newest Quicksilver kernel
-* Removed wireguard
+* Fixed charging issues
+* Added wireguard back
+* Fixed haptic issues
