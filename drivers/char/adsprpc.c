@@ -3532,7 +3532,7 @@ static int fastrpc_channel_open(struct fastrpc_file *fl)
 	if (cid == ADSP_DOMAIN_ID && me->channel[cid].ssrcount !=
 			 me->channel[cid].prevssrcount) {
 		mutex_unlock(&me->channel[cid].smd_mutex);
-		if (fastrpc_mmap_remove_ssr(fl, 1))
+		if (fastrpc_mmap_remove_ssr(fl, 1)) {
 			pr_err("adsprpc: %s: SSR: Failed to unmap remote heap for %s\n",
 				__func__, me->channel[cid].name);
 		}
