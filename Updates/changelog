@@ -1,3 +1,2 @@
-* Fixed charging issues
-* Added wireguard back
-* Fixed haptic issues
+* Merged latest changes from quicksilver kernel
+* Fixed random reboot when alarm was set
