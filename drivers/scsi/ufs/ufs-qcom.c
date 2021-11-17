@@ -1263,9 +1263,9 @@ static void ufs_qcom_dev_ref_clk_ctrl(struct ufs_qcom_host *host, bool enable)
 		if (enable) {
 			if (host->hba->dev_info.quirks &
 			    UFS_DEVICE_QUIRK_WAIT_AFTER_REF_CLK_UNGATE)
-				usleep_range(50, 60);
+				usleep_range(960, 970);
 			else
-				udelay(1);
+				usleep_range(200, 210);
 		}
 
 		host->is_dev_ref_clk_enabled = enable;
@@ -1523,13 +1523,7 @@ static int ufs_qcom_setup_clocks(struct ufs_hba *hba, bool on,
 			ufs_qcom_dev_ref_clk_ctrl(host, true);
 
 	} else if (!on && (status == PRE_CHANGE)) {
-		/*
-		 * If auto hibern8 is supported then the link will already
-		 * be in hibern8 state and the ref clock can be gated.
-		 */
-		if ((ufshcd_is_auto_hibern8_supported(hba) &&
-		     hba->hibern8_on_idle.is_enabled) ||
-		    !ufs_qcom_is_link_active(hba)) {
+		if (!ufs_qcom_is_link_active(hba)) {
 			/* disable device ref_clk */
 			ufs_qcom_dev_ref_clk_ctrl(host, false);
 
