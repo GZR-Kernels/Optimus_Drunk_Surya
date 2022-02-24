@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011-2022 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -548,7 +548,30 @@ typedef  enum  {
     WMI_SERVICE_DYN_NSS_MASK_SUPPORT = 303, /* Indicates FW support for DYN NSS feature */
     WMI_SERVICE_HW_MODE_POLICY_OFFLOAD_SUPPORT = 304, /* FW supports HW mode selection offload */
     WMI_SERVICE_THERMAL_THROT_STATS_TEMP_RANGE_SUPPORT = 305, /* FW supports thermal throttling temperature range stats based on wmi_thermal_stats_action */
-
+    /*
+     * Indicates FW support for spatial reuse enhancements.
+     * Below commands are added for the enhancements:
+     *     WMI_PDEV_PARAM_OBSS_MIN_DURATION_CHECK_FOR_SR,
+     *     WMI_PDEV_PARAM_TRUNCATE_SR,
+     *     WMI_PDEV_PARAM_CTRL_FRAME_OBSS_PD_THRESHOLD
+     */
+    WMI_SERVICE_SPATIAL_REUSE_ENHANCEMENT_SUPPORT = 306,
+    WMI_SERVICE_MU_SNIF = 307, /* FW support MU sniffer */
+    WMI_SERVICE_ICMP_OFFLOAD = 308, /* FW supports ping offload during APPS suspend */
+    WMI_SERVICE_RTSCTS_FOR_UNICAST_MGMT_SUPPORT = 309, /* Indicates FW support RTSCTS for unicast management */
+    WMI_SERVICE_DYNAMIC_VDEV_MAC_ADDR_UPDATE_SUPPORT = 310, /* FW supports dynamic vdev mac address updating */
+    WMI_SERVICE_SAWF_LEVEL0 = 311, /* FW supports WMI_SAWF_SVC_CLASS CFG_CMD + DISABLE_CMD msgs */
+    WMI_SERVICE_RTT_11AZ_NTB_SUPPORT = 312, /* FW support for 11AZ non trigger based ranging */
+    WMI_SERVICE_RTT_11AZ_TB_SUPPORT = 313, /* FW support for 11AZ trigger based ranging */
+    WMI_SERVICE_RTT_11AZ_MAC_SEC_SUPPORT = 314, /* FW support for 11AZ secure FTM */
+    WMI_SERVICE_RTT_11AZ_MAC_PHY_SEC_SUPPORT = 315, /* FW support for 11AZ secure LTF + FTM */
+    WMI_SERVICE_SPECTRAL_SESSION_INFO_SUPPORT = 316, /* Information corresponding to each Spectral scan session will be sent by the FW before the reports corresponding to that session are sent */
+    WMI_SERVICE_PDEV_RATE_CONFIG_SUPPORT = 317, /* Support rate configurations per PDEV */
+    MI_SERVICE_MLO_STA_NAN_NDI_SUPPORT = 318, /* FW support for NAN and NDP support with MLO STA */
+    WMI_SERVICE_PROBE_ALL_BW_SUPPORT = 319, /* FW support to probe on higher BW even if the probe fails on lower BW - IOT issue */
+    WMI_SERVICE_PKTLOG_DECODE_INFO_SUPPORT = 320, /* FW supports embedding Pktlog decode info in the Pktlog trace file level header */
+    WMI_SERVICE_PNO_SCAN_CONFIG_PER_CHANNEL = 321, /* Indicates that FW supports per channel configuration support in the PNO scan start command */
+    WMI_SERVICE_MULTIPLE_PEER_GROUP_CMD_SUPPORT = 322, /* FW support for multiple peer group command */
 
     WMI_MAX_EXT2_SERVICE
 
