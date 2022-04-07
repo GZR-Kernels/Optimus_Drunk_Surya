@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2022 TheStrechh (Carlos Arriaga)
 #
-# Basic scrip for merge CAF
+# Basic scrip for merge CodeLinaro
 #
 
 # Colors
@@ -21,7 +21,7 @@ echo
 sleep 1
 
 # Fetch CAF tag from user
-read -p "<Enter the CAF tag you want to merge:> " TAG
+read -p "<Enter the CodeLinaro tag you want to merge:> " TAG
 echo
 
 sleep 1
@@ -30,19 +30,19 @@ sleep 1
 echo "${blu} ||===Starting merge===|| ${end}"
 echo
 
-    git fetch https://source.codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/qcacld-3.0 $TAG &&
+    git fetch https://git.codelinaro.org/clo/la/platform/vendor/qcom-opensource/wlan/qcacld-3.0 $TAG &&
 	git merge -X subtree=drivers/staging/qcacld-3.0 FETCH_HEAD
 
-    git fetch https://source.codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/fw-api $TAG &&
+    git fetch https://git.codelinaro.org/clo/la/platform/vendor/qcom-opensource/wlan/fw-api $TAG &&
 	git merge -X subtree=drivers/staging/fw-api FETCH_HEAD
 
-    git fetch https://source.codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/qca-wifi-host-cmn $TAG &&
+    git fetch https://git.codelinaro.org/clo/la/platform/vendor/qcom-opensource/wlan/qca-wifi-host-cmn $TAG &&
 	git merge -X subtree=drivers/staging/qca-wifi-host-cmn FETCH_HEAD
 
-    git fetch https://source.codeaurora.org/quic/la/platform/vendor/opensource/audio-kernel $TAG &&
+    git fetch https://git.codelinaro.org/clo/la/platform/vendor/opensource/audio-kernel $TAG &&
 	git merge -X subtree=techpack/audio FETCH_HEAD
 
-    git fetch https://source.codeaurora.org/quic/la/kernel/msm-$VERSION $TAG &&
+    git fetch https://git.codelinaro.org/clo/la/kernel/msm-$VERSION $TAG &&
 	git merge FETCH_HEAD
 
 sleep 1
