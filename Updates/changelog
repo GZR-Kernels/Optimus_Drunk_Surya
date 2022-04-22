@@ -1,3 +1,3 @@
-* Updated to 4.9.275
-* Added vibration control
-* Some small fixes for power consumption
+* Updated to 4.9.276
+* Added devfreq boost
+* Reworked cpu boost
