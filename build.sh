@@ -4,7 +4,7 @@
 
 KERNEL_DEFCONFIG=vendor/surya_defconfig
 ANYKERNEL3_DIR=$PWD/AnyKernel3/
-FINAL_KERNEL_ZIP=Optimus_Drunk_Surya_v12.2.zip
+FINAL_KERNEL_ZIP=Optimus_Drunk_Surya_v12.3.zip
 export ARCH=arm64
 
 # Speed up build process
