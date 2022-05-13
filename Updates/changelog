@@ -1,3 +1,1 @@
-* Tuned devfreq boost
-* Fixed GPU utilisation with high fresh rates
-* Added adreno boost (disabled by default)
+* Updated to 4.14.278
