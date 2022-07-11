@@ -1,66 +1,65 @@
 #!/bin/bash
-#
-# Compile script for QuicksilveR kernel
-# Copyright (C) 2020-2021 Adithya R.
 
-SECONDS=0 # builtin bash timer
-ZIPNAME="QuicksilveR-surya-$(date '+%Y%m%d-%H%M').zip"
-TC_DIR="$HOME/tc/azure-clang"
-AK3_DIR="$HOME/android/AnyKernel3"
-DEFCONFIG="vendor/surya-perf_defconfig"
+#set -e
 
-export PATH="$TC_DIR/bin:$PATH"
+KERNEL_DEFCONFIG=vendor/surya_defconfig
+ANYKERNEL3_DIR=$PWD/AnyKernel3/
+FINAL_KERNEL_ZIP=Optimus_Drunk_Surya_v12.10.zip
+export ARCH=arm64
 
-if ! [ -d "$TC_DIR" ]; then
-	echo "Azure clang not found! Cloning to $TC_DIR..."
-	if ! git clone --depth=1 -b main https://gitlab.com/Panchajanya1999/azure-clang "$TC_DIR"; then
-		echo "Cloning failed! Aborting..."
-		exit 1
-	fi
-fi
+# Speed up build process
+MAKE="./makeparallel"
 
-if [[ $1 = "-r" || $1 = "--regen" ]]; then
-	make O=out ARCH=arm64 $DEFCONFIG savedefconfig
-	cp out/defconfig arch/arm64/configs/$DEFCONFIG
-	echo -e "\nSuccessfully regenerated defconfig at $DEFCONFIG"
-	exit
-fi
+BUILD_START=$(date +"%s")
+blue='\033[1;34m'
+yellow='\033[1;33m'
+nocol='\033[0m'
 
-if [[ $1 = "-c" || $1 = "--clean" ]]; then
-	rm -rf out
-fi
-
+# Always do clean build lol
+echo -e "$yellow**** Cleaning ****$nocol"
 mkdir -p out
-make O=out ARCH=arm64 $DEFCONFIG
+make O=out clean
 
-echo -e "\nStarting compilation...\n"
-make -j$(nproc --all) O=out ARCH=arm64 CC=clang LD=ld.lld AS=llvm-as AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- Image.gz dtbo.img
+echo -e "$yellow**** Kernel defconfig is set to $KERNEL_DEFCONFIG ****$nocol"
+echo -e "$blue***********************************************"
+echo "          BUILDING KERNEL          "
+echo -e "***********************************************$nocol"
+make $KERNEL_DEFCONFIG O=out
+make -j$(nproc --all) O=out \
+                      ARCH=arm64 \
+                      CC=$KERNELDIR/prebuilts/clang-r445002/bin/clang \
+                      CLANG_TRIPLE=aarch64-linux-gnu- \
+                      CROSS_COMPILE=$KERNELDIR/prebuilts/aarch64-linux-android-4.9/bin/aarch64-linux-android- \
+                      CROSS_COMPILE_ARM32=$KERNELDIR/prebuilts/arm-linux-androideabi-4.9/bin/arm-linux-androideabi-
 
-kernel="out/arch/arm64/boot/Image.gz"
-dtb="out/arch/arm64/boot/dts/qcom/sdmmagpie.dtb"
-dtbo="out/arch/arm64/boot/dtbo.img"
+echo -e "$yellow**** Verify Image.gz & dtbo.img ****$nocol"
+ls $PWD/out/arch/arm64/boot/Image.gz
+ls $PWD/out/arch/arm64/boot/dtbo.img
 
-if [ -f "$kernel" ] && [ -f "$dtb" ] && [ -f "$dtbo" ]; then
-	echo -e "\nKernel compiled succesfully! Zipping up...\n"
-	if [ -d "$AK3_DIR" ]; then
-		cp -r $AK3_DIR AnyKernel3
-	elif ! git clone -q https://github.com/ghostrider-reborn/AnyKernel3 -b surya; then
-		echo -e "\nAnyKernel3 repo not found locally and couldn't clone from GitHub! Aborting..."
-		exit 1
-	fi
-	cp $kernel $dtbo AnyKernel3
-	cp $dtb AnyKernel3/dtb
-	rm -rf out/arch/arm64/boot
-	cd AnyKernel3
-	git checkout surya &> /dev/null
-	zip -r9 "../$ZIPNAME" * -x .git README.md *placeholder
-	cd ..
-	rm -rf AnyKernel3
-	echo -e "\nCompleted in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s) !"
-	echo "Zip: $ZIPNAME"
-	curl --upload-file "$ZIPNAME" http://transfer.sh/"$ZIPNAME"
-	echo
-else
-	echo -e "\nCompilation failed!"
-	exit 1
-fi
+echo -e "$yellow**** Verifying AnyKernel3 Directory ****$nocol"
+ls $ANYKERNEL3_DIR
+echo -e "$yellow**** Removing leftovers ****$nocol"
+rm -rf $ANYKERNEL3_DIR/Image.gz
+rm -rf $ANYKERNEL3_DIR/dtbo.img
+rm -rf $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP
+
+echo -e "$yellow**** Copying Image.gz & dtbo.img ****$nocol"
+cp $PWD/out/arch/arm64/boot/Image.gz $ANYKERNEL3_DIR/
+cp $PWD/out/arch/arm64/boot/dtbo.img $ANYKERNEL3_DIR/
+
+echo -e "$yellow**** Time to zip up! ****$nocol"
+cd $ANYKERNEL3_DIR/
+zip -r9 $FINAL_KERNEL_ZIP * -x README $FINAL_KERNEL_ZIP
+cp $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP $KERNELDIR/$FINAL_KERNEL_ZIP
+
+echo -e "$yellow**** Done, here is your checksum ****$nocol"
+cd ..
+rm -rf $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP
+rm -rf $ANYKERNEL3_DIR/Image.gz
+rm -rf $ANYKERNEL3_DIR/dtbo.img
+rm -rf out/
+
+BUILD_END=$(date +"%s")
+DIFF=$(($BUILD_END - $BUILD_START))
+echo -e "$yellow Build completed in $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.$nocol"
+sha1sum $KERNELDIR/$FINAL_KERNEL_ZIP
