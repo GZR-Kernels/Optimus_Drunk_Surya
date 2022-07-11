@@ -1,0 +1,4 @@
+* Rebased on Stormbreaker X15
+* Added i/o schedulers and wakelock blocker
+* Made compatible for building inline with roms
+* No more linux upstream
