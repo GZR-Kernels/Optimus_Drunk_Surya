@@ -51,7 +51,7 @@
 		qcom,mdss-dsi-bl-min-level = <1>;
 		qcom,mdss-dsi-bl-max-level = <4095>;
 		qcom,mdss-dsi-post-init-delay = <1>;
-		qcom,mdss-dsi-qsync-min-refresh-rate = <30>;
+		qcom,mdss-dsi-qsync-min-refresh-rate = <60>;
 		qcom,mdss-dsi-pan-enable-dynamic-fps;
 		qcom,mdss-dsi-pan-enable-smart-fps;
 		qcom,mdss-dsi-pan-fps-update =
